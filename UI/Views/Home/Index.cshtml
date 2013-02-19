@@ -1,0 +1,39 @@
+﻿@using Penny.API
+@using Penny.UI
+@{
+	ViewBag.Title = UIConfig.Title;
+	Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<h2>@UIConfig.Title</h2>
+<div>
+	<div class="top-panel">
+		Date: <label id="date-label">@(DateTime.Today.ToString(Constants.dateFormat))</label>
+	</div>
+	<div class="left-panel">
+		<div id="date-picker-div"></div>
+		</div>
+	<div class="right-panel">
+		<div>
+			Tags: <input type="text" id="tags-textbox" class="tags" />
+		</div>
+		<div class="full-width">
+			<textarea id="entry-textarea" rows="15" cols="100" class="entry"></textarea>
+		</div>
+	</div>
+	<div>
+		<button id="save-button" class="float-right" >Save</button>
+	</div>
+	<div class="clearboth">
+		<input id="search-textbox" class="search-box"/><button id="search-button">Search</button>
+	</div>
+	<div id="search-result-div">
+		
+	</div>
+</div>
+<script src="@Url.Content("~/Scripts/Penny/Home.js")" type="text/javascript"></script>
+<script type="text/javascript">
+	$(function () {
+		PENNY.home.ready();
+	});
+</script>

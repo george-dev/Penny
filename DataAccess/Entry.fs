@@ -1,0 +1,54 @@
+﻿namespace Penny.DataAccess
+
+open System
+open System.Xml
+open System.Xml.Linq
+open System.IO
+open Penny.DataAccess.Utils
+open Penny.Common
+open Penny.Common.Utils
+
+module Entry = 
+
+    let save (date: DateTime) (text: String) (tags: String) = 
+        let date = date |> stringifyDate
+        let tags = (tags |> defaultIfNull "").Split(',')
+        let xml = new XElement(xName "Entry",
+                    new XElement(xName "Date", date),
+                    new XElement(xName "Text", text |> defaultIfNull ""),
+                    new XElement(xName "Tags",
+                        tags |> Array.map (fun x -> new XElement(xName "Tag", x.Trim()))))
+
+        let path = Path.Combine(Config.baseDirectory |> ensureDirectory, date + ".xml")
+        File.WriteAllText(path , xml.ToString())
+
+    let load (date: DateTime) = 
+        let path = Path.Combine(Config.baseDirectory, (date |> stringifyDate) + ".xml")
+        if File.Exists(path) then
+            let xml = XElement.Parse(File.ReadAllText(path))
+            let date = xml |> (xElement "Date") |> xValue |> parseDate
+            let entry = xml |> (xElement "Text") |> xValue
+            let tags = match xml |> xElementExists "Tags" with
+                       | true -> xml |> xElement "Tags"
+                                     |> xElements "Tag"
+                                     |> Seq.map xValue
+                                     |> Seq.toArray
+                       | false -> Array.empty
+            let tags = String.Join(", ", tags)
+            (date, entry, tags)
+        else
+            (DateTime.Today, String.Empty, String.Empty)
+
+    let loadEntryDates year month = 
+        let dateString = new DateTime(year, month, 1) |> stringifyDate
+        let yearAndMonth = dateString.Substring(0, 6);
+        let entriesForMonth = Directory.GetFiles(Config.baseDirectory)
+                              |> Array.map Path.GetFileNameWithoutExtension
+                              |> Array.filter (fun fileName -> fileName.StartsWith(yearAndMonth))
+                              |> Array.map parseDate
+        entriesForMonth
+
+
+        
+            
+

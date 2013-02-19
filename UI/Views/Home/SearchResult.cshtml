@@ -1,0 +1,40 @@
+﻿@using Penny.API
+
+@model IEnumerable<Domain.Entry>
+@{
+	var list = (Model ?? Enumerable.Empty<Domain.Entry>()).ToArray();
+}
+
+<div>
+	@if (list.Any())
+ {
+		<table class="search-result-grid">
+			<thead>
+				<tr>
+					<th>Date</th>
+					<th>Tags</th>
+					<th></th>
+				</tr>
+			</thead>
+			<tbody>
+
+				@foreach (var entry in list.Select((e, i) => new { Entry = e, IsAlternating = i % 2 == 1 }))
+	{
+		var date = entry.Entry.Date.ToString("dddd dd MMMM yyyy");
+					<tr class="@(entry.IsAlternating ? "odd" : "even")">
+
+						<td>@date</td>
+						<td>@entry.Entry.Tags</td>
+						<td>
+							<button class="_load-search-result-button" data-penny-date="@(date)">Load</button></td>
+					</tr>
+	}
+
+			</tbody>
+		</table>
+ }
+ else
+ {
+		<text>No Results</text>
+ }
+</div>
