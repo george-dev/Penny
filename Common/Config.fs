@@ -10,7 +10,7 @@ module Config =
 
     let dateFormat = "yyyyMMdd - dddd dd MMMM yyyy"
 
-    let storageConnectionString = ConfigurationManager.AppSettings.["blobStorage"]
+    let storageConnectionString = ConfigurationManager.AppSettings.["StorageConnectionString"]
 
     let blobContainerName = "penny"
 
