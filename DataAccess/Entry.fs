@@ -22,8 +22,9 @@ module Entry =
 
     let load (date: DateTime) = 
         let entryName = (date |> stringifyDate) + ".xml"
-        if Cloud.blobExists (Config.blobContainerName) entryName then
-            let blob = Cloud.getBlob (Config.blobContainerName) entryName
+        let blob = Cloud.getBlob (Config.blobContainerName) entryName
+        match blob with
+        | Some blob ->
             let xml = XElement.Parse(blob)
             let date = xml |> (xElement "Date") |> xValue |> parseDate
             let entry = xml |> (xElement "Text") |> xValue
@@ -35,8 +36,7 @@ module Entry =
                        | false -> Array.empty
             let tags = String.Join(", ", tags)
             (date, entry, tags)
-        else
-            (DateTime.Today, String.Empty, String.Empty)
+        | None -> (DateTime.Today, String.Empty, String.Empty)
 
     let loadEntryDates year month = 
         let dateString = new DateTime(year, month, 1) |> stringifyDate
