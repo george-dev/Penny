@@ -20,7 +20,7 @@ module Indexing =
     let private idField = "id"
 
     let indexEntry (date: DateTime) = 
-        use dir = FSDirectory.Open(DirectoryInfo(indexPath))
+        use dir = new Azure.AzureDirectory(Penny.Common.Cloud.getStorageAccount())
         use analyzer = new StandardAnalyzer(Version.LUCENE_30)
         use writer = new IndexWriter(dir, analyzer, IndexWriter.MaxFieldLength.LIMITED)
         
@@ -42,7 +42,7 @@ module Indexing =
         use analyzer = new StandardAnalyzer(Version.LUCENE_30)
         let parser = QueryParser(Version.LUCENE_30, "all", analyzer)
         let userQuery = parser.Parse(query)
-        use dir = FSDirectory.Open(DirectoryInfo(indexPath))
+        use dir = new Azure.AzureDirectory(Penny.Common.Cloud.getStorageAccount())
         use indexSearcher = new IndexSearcher(dir, true)
         let results = indexSearcher.Search(userQuery, 50)
         let resultDocs = results.ScoreDocs 

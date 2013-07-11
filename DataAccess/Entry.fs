@@ -18,14 +18,13 @@ module Entry =
                     new XElement(xName "Text", text |> defaultIfNull ""),
                     new XElement(xName "Tags",
                         tags |> Array.map (fun x -> new XElement(xName "Tag", x.Trim()))))
-
-        let path = Path.Combine(Config.baseDirectory |> ensureDirectory, date + ".xml")
-        File.WriteAllText(path , xml.ToString())
+        Cloud.saveBlob (Config.blobContainerName) (date + ".xml") (xml.ToString())
 
     let load (date: DateTime) = 
-        let path = Path.Combine(Config.baseDirectory, (date |> stringifyDate) + ".xml")
-        if File.Exists(path) then
-            let xml = XElement.Parse(File.ReadAllText(path))
+        let entryName = (date |> stringifyDate) + ".xml"
+        if Cloud.blobExists (Config.blobContainerName) entryName then
+            let blob = Cloud.getBlob (Config.blobContainerName) entryName
+            let xml = XElement.Parse(blob)
             let date = xml |> (xElement "Date") |> xValue |> parseDate
             let entry = xml |> (xElement "Text") |> xValue
             let tags = match xml |> xElementExists "Tags" with
@@ -42,7 +41,7 @@ module Entry =
     let loadEntryDates year month = 
         let dateString = new DateTime(year, month, 1) |> stringifyDate
         let yearAndMonth = dateString.Substring(0, 6);
-        let entriesForMonth = Directory.GetFiles(Config.baseDirectory)
+        let entriesForMonth = Cloud.listBlobs (Config.blobContainerName)
                               |> Array.map Path.GetFileNameWithoutExtension
                               |> Array.filter (fun fileName -> fileName.StartsWith(yearAndMonth))
                               |> Array.map parseDate
