@@ -43,3 +43,14 @@ module Cloud =
 
     let getStorageAccount() = 
         CloudStorageAccount.Parse(Config.storageConnectionString)
+
+    let clearContainer containerName = 
+        let storageAccount = CloudStorageAccount.Parse(Config.storageConnectionString)
+        let blobClient = storageAccount.CreateCloudBlobClient()
+        let container = blobClient.GetContainerReference(containerName)
+        if container.Exists() then
+            container.ListBlobs() |> Seq.iter (fun blob ->
+                                                    let blob = (blob :?> CloudBlockBlob)
+                                                    let blobName = blob.Name
+                                                    let blockBlob = container.GetBlockBlobReference(blobName)
+                                                    blockBlob.Delete())

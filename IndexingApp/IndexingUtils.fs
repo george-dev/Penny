@@ -8,14 +8,19 @@ open Penny.Common.Utils
 module IndexingUtils = 
 
     let reIndexEverything () = 
-        let indexPath = Path.Combine(Config.baseDirectory, "Index")
-        Directory.Delete(indexPath, true)
-        Directory.GetFiles(Config.baseDirectory)
+        Cloud.clearContainer "lucene"
+        Cloud.listBlobs (Config.blobContainerName)
             |> Array.map Path.GetFileNameWithoutExtension
             |> Array.collect (fun fileName -> 
                                     match tryParseDate fileName with
                                     | true, date -> [| date |]
                                     | false, _   -> Array.empty)
             |> Array.iter Indexing.indexEntry
+
+    let moveEntriesToCloud () = 
+        Cloud.clearContainer (Config.blobContainerName)
+        Directory.GetFiles(Config.baseDirectory)
+            |> Array.map (fun path -> Path.GetFileName(path), File.ReadAllText(path))
+            |> Array.iter (fun (path, text) -> Cloud.saveBlob (Config.blobContainerName) path text)
         
 
