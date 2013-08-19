@@ -12,13 +12,17 @@ module Entry =
 
     let save (date: DateTime) (text: String) (tags: String) = 
         let date = date |> stringifyDate
-        let tags = (tags |> defaultIfNull "").Split(',')
-        let xml = new XElement(xName "Entry",
-                    new XElement(xName "Date", date),
-                    new XElement(xName "Text", text |> defaultIfNull ""),
-                    new XElement(xName "Tags",
-                        tags |> Array.map (fun x -> new XElement(xName "Tag", x.Trim()))))
-        Cloud.saveBlob (Config.blobContainerName) (date + ".xml") (xml.ToString())
+        if text = null || text.Trim() = "" then
+            Cloud.deleteBlob (Config.blobContainerName) (date + ".xml")
+        else
+            let text = text.Trim()
+            let tags = (tags |> defaultIfNull "").Split(',')
+            let xml = new XElement(xName "Entry",
+                        new XElement(xName "Date", date),
+                        new XElement(xName "Text", text |> defaultIfNull ""),
+                        new XElement(xName "Tags",
+                            tags |> Array.map (fun x -> new XElement(xName "Tag", x.Trim()))))
+            Cloud.saveBlob (Config.blobContainerName) (date + ".xml") (xml.ToString())
 
     let load (date: DateTime) = 
         let entryName = (date |> stringifyDate) + ".xml"

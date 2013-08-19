@@ -29,13 +29,14 @@ module Indexing =
         let date = date |> stringifyDate
         let tags = tags.Split(',') |> Array.map (fun tag -> tag.Trim())
         writer.DeleteDocuments(Term(idField, date))
-        let indexDoc = Document()
-        indexDoc.Add(Field(idField, date, Field.Store.YES, Field.Index.NOT_ANALYZED))
-        indexDoc.Add(Field("date", date, Field.Store.NO, Field.Index.ANALYZED))
-        indexDoc.Add(Field("all", date + " " + entry + " " + String.Join(" ", tags), Field.Store.NO, Field.Index.ANALYZED))
-        tags |> Array.iter (fun tag -> indexDoc.Add(Field("tag", tag, Field.Store.YES, Field.Index.ANALYZED)))
+        if entry <> "" then
+            let indexDoc = Document()
+            indexDoc.Add(Field(idField, date, Field.Store.YES, Field.Index.NOT_ANALYZED))
+            indexDoc.Add(Field("date", date, Field.Store.NO, Field.Index.ANALYZED))
+            indexDoc.Add(Field("all", date + " " + entry + " " + String.Join(" ", tags), Field.Store.NO, Field.Index.ANALYZED))
+            tags |> Array.iter (fun tag -> indexDoc.Add(Field("tag", tag, Field.Store.YES, Field.Index.ANALYZED)))
+            writer.AddDocument(indexDoc)
 
-        writer.AddDocument(indexDoc)
         writer.Optimize()
         writer.Commit()
 

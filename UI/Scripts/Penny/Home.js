@@ -56,7 +56,9 @@ PENNY.home = (function () {
 			var $aTag = $(this),
 				text = $aTag.text();
 			if ($.isNumeric(text) && ($.inArray(parseInt(text, 10), currentEntries) !== -1)) {
-				$aTag.css("font-weight", "bold").css("color", "#0066FF");
+				$aTag.css("font-weight", "bold").css("color", "#9933FF");
+			} else {
+				$aTag.css("font-weight", "normal").css("color", "#000000");
 			}
 		});
 
