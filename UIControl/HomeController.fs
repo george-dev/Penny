@@ -6,8 +6,10 @@ open System.Web.Mvc
 open Penny.API.Domain
 
 [<HandleError>]
+[<Authorize>]
 type HomeController() =
     inherit Controller()
+
     member x.Index () =
         x.View() :> ActionResult
 
